@@ -86,7 +86,10 @@ public class DaplugDongleWinusb implements IWinusb{
 	private void findAllDevices() {
 //		Vector<Device> v_dev = new Vector<Device>();
 		DeviceList list = new DeviceList();
-		int result = LibUsb.getDeviceList(null, list);
+		//Edited by: s.benamar@plug-up.com 20/03/2015
+		//Context parameter is set to the current context
+		int result = LibUsb.getDeviceList(this.context, list);
+		//
 		if (result < 0)
 			throw new LibUsbException("Unable to get device list", result);
 		try {
@@ -96,8 +99,11 @@ public class DaplugDongleWinusb implements IWinusb{
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
-			// Ensure the allocated device list is freed
-			LibUsb.freeDeviceList(list, true);
+			//Ensure the allocated device list is freed
+			//Edited by: s.benamar@plug-up.com 20/03/2015
+			//The unrefDevices parameter is not set (=false)
+			LibUsb.freeDeviceList(list, false);
+			//
 		}
 	}
 
