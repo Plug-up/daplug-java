@@ -24,6 +24,7 @@ import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
 import org.usb4java.*;
+
 import io.daplug.utils.DaplugUtils;
 
 public class WinusbComm implements IWinusb {
@@ -136,21 +137,15 @@ public class WinusbComm implements IWinusb {
 	 */
 	private String p_exchange(byte[] w_block) {
 
-		// Claim interfaces to proceed to do write and read on winusb device
-		// Check if kernel driver must be detached
-		boolean detach = LibUsb
-				.hasCapability(LibUsb.CAP_SUPPORTS_DETACH_KERNEL_DRIVER)
-				&& (LibUsb.kernelDriverActive(this.dhandle,
-						this.deviceInterface) != 0 ? true : false);
-
-		// Detach the kernel driver
-		if (detach) {
-			int result = LibUsb.detachKernelDriver(this.dhandle,
-					this.deviceInterface);
-			if (result != LibUsb.SUCCESS)
-				throw new LibUsbException("Unable to detach kernel driver",
-						result);
-		}
+		//Added by: s.benamar@plug-up.com (20/03/2015)
+		//detachKernelDriver and attachKernelDriver functions are omitted
+	    //Claim the interface before performing I/O
+	    int r = LibUsb.claimInterface(this.dhandle, this.deviceInterface);
+	    if(r != LibUsb.SUCCESS){
+	    	throw new LibUsbException("LibUsb.claimInterface error",r);
+	    }
+	    //
+	    
 		// start communication with the device
 		
 		// send data to the device in bulk mode : use LibUsb.BulkTransfer to no deal with 
@@ -175,14 +170,6 @@ public class WinusbComm implements IWinusb {
 			throw new LibUsbException("Unable to read data", result_read);
 		int value_received = r_transferred.get();
 
-		// Attach the kernel driver again
-		if (detach) {
-			int result = LibUsb.attachKernelDriver(this.dhandle,
-					this.deviceInterface);
-			if (result != LibUsb.SUCCESS)
-				throw new LibUsbException("Unable to re-attach kernel driver",
-						result);
-		}
 		//get 
 		byte [] f_result = new byte[r_buffer.capacity()];
 		r_buffer.get(f_result, 0, f_result.length);
