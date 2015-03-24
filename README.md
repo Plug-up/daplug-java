@@ -1,4 +1,4 @@
-## Java Daplug API 1.0.3 ##
+## Java Daplug API 1.0.4 ##
 
 Java Daplug API is a Java library for communication with Daplug dongles. It maps the Daplug dongle specification in an user friendly format.
 
