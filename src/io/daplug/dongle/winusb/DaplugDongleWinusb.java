@@ -50,8 +50,11 @@ public class DaplugDongleWinusb implements IWinusb{
 	 * @param path Strimg 
 	 */
 	public DaplugDongleWinusb(String path) {
-		initContext();
-		this.findAllDevices();
+		//Edited by: s.benamar@plug-up.com 24/03/2015	
+		//No need for this
+		//initContext();
+		//this.findAllDevices();
+		//
 		this.device = this.openDaplugWinusb(path);
 		this.winusbcomm = new WinusbComm(this.device);
 	}
@@ -84,6 +87,10 @@ public class DaplugDongleWinusb implements IWinusb{
 	 * @author yassir
 	 */
 	private void findAllDevices() {
+		//Edited by: s.benamar@plug-up.com 24/03/2015
+		//Initialize the vector each time the method is called
+		allDevices.clear();
+		//
 //		Vector<Device> v_dev = new Vector<Device>();
 		DeviceList list = new DeviceList();
 		//Edited by: s.benamar@plug-up.com 20/03/2015
