@@ -932,7 +932,18 @@ public final class DaplugSession {
     		String hexStrBuf = "";
         	hexStrBuf = hexStrBuf.concat("80B0");
         	hexStrBuf = hexStrBuf.concat(String.format("%04X", offset));
-        	hexStrBuf = hexStrBuf.concat("00");
+        	
+            //Now, according to the product specification, we should add the apdu Le parameter, wich specifies the number of data that should be returned by the card.
+            //But, in our approch, this is seen as the Lc parameter. So, to prevent length errors, we add Lc zero-byte as fake data.
+        	byte[] fakeBytes;
+        	if(readsNb > 1 || lastPartLen == 0){
+        		fakeBytes = new byte[MAX_REAL_DATA_SIZE];
+        		hexStrBuf = hexStrBuf.concat("EF");
+        	}else{
+        		hexStrBuf = hexStrBuf.concat(String.format("%02X", lastPartLen));
+        		fakeBytes = new byte[lastPartLen];
+        	}
+    		hexStrBuf = hexStrBuf.concat(DaplugUtils.byteArrayToHexString(fakeBytes));
         	
         	try{
         		DaplugApduCommand a = new DaplugApduCommand(DaplugUtils.hexStringToByteArray(hexStrBuf));
@@ -951,7 +962,10 @@ public final class DaplugSession {
             		System.arraycopy(r.getData(), 0, readData, i * MAX_REAL_DATA_SIZE, len);
         		}else{
         			readData = null;
-        			throw new Exception("readData() - Data read failed !");
+        			if(r.getSW1() == 0x67) 
+        				throw new Exception("readData() - Wrong length. The requested length seems exceed file's size !");
+        			else 
+        				throw new Exception("readData() - Data read failed !");
         		}
         	}catch(Exception e){
         		System.err.println(e.getMessage());
